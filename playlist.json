@@ -1,5 +1,26 @@
 [
-  { "title": "OpenArt 1", "src": "./videos/openart1.mp4" },
-  { "title": "Grok 1", "src": "./videos/grok1.mp4" },
-  { "title": "Signal 3", "src": "./videos/signal3.mp4" }
+  {
+    "title": "OpenArt 1",
+    "src": "./videos/openart1.mp4",
+    "category": "Music 1",
+    "description": "Première vidéo de la sélection Music 1."
+  },
+  {
+    "title": "Grok 1",
+    "src": "./videos/grok1.mp4",
+    "category": "Music 1",
+    "description": "Deuxième clip avec ambiance visuelle continue."
+  },
+  {
+    "title": "Signal 3",
+    "src": "./videos/signal3.mp4",
+    "category": "Music 2",
+    "description": "Vidéo classée dans la section Music 2."
+  },
+  {
+    "title": "Live Session 1",
+    "src": "./videos/live-session-1.mp4",
+    "category": "Live",
+    "description": "Session live au format MP4."
+  }
 ]
