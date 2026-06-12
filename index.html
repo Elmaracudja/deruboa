@@ -3,12 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Deruboa — playlist vidéo MP4 avec lecture automatique dans une interface élégante et minimaliste." />
-  <title>Deruboa</title>
+  <title>EM101 Webradio</title>
 
   <link rel="preconnect" href="https://api.fontshare.com" />
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
-
   <link rel="stylesheet" href="./style.css" />
   <script src="./script.js" defer></script>
 </head>
@@ -16,80 +14,102 @@
   <a href="#main" class="skip-link">Aller au contenu</a>
 
   <header class="site-header">
-    <div class="header-inner">
-      <a href="./index.html" class="brand-link" aria-label="Accueil EM101 Webradio">
-        <div class="logo-slot">
-          <img
-            src="./assets/EM101.jpg"
-            alt="Logo Deruboa"
-            class="logo-image"
-            width="160"
-            height="160"
-            loading="eager"
-          />
-        </div>
-
+    <div class="site-header-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
         <div class="brand-copy">
-          <p class="eyebrow">Mini website</p>
-          <h1>EM101 Webradio</h1>
-          <p class="brand-subtitle">Playlist vidéo automatique</p>
+          <span class="eyebrow">Mini website</span>
+          <span class="brand-name">EM101 Webradio</span>
         </div>
-      </a>
+      </div>
+
+      <nav class="top-nav" aria-label="Navigation principale">
+        <a href="#">Home</a>
+        <a href="#">Bio</a>
+        <a href="#">Photos</a>
+        <a href="#">Videos</a>
+        <a href="#">Store</a>
+      </nav>
+
+      <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Changer le thème">
+        Theme
+      </button>
     </div>
   </header>
 
-  <main id="main" class="page-shell">
-    <section class="hero-block">
-      <div class="hero-copy">
-        <p class="eyebrow">Expérience vidéo</p>
-        <h2 class="hero-title">Une vitrine sombre, fluide et propre pour tes MP4.</h2>
-        <p class="hero-text">
-          Tes vidéos se lancent dans un lecteur central élégant, avec une playlist claire et un enchaînement automatique pensé pour une lecture simple et agréable.
-        </p>
+  <main id="main">
+    <section class="hero-section">
+      <div class="container-wide">
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <span class="badge">Playlist vidéo automatique</span>
+            <h1>Une vitrine vidéo sombre et immersive.</h1>
+            <p>
+              Une interface pensée pour tes MP4 : lecture continue, playlist claire,
+              ambiance media et style réutilisable sur toutes tes pages.
+            </p>
+          </div>
+
+          <div class="hero-card">
+            <span class="eyebrow">Expérience</span>
+            <h2>Lecture continue</h2>
+            <p>
+              Chargement JSON, lecteur HTML5, lecture automatique de la vidéo suivante,
+              design bleu nuit inspiré d’un portail musical.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
 
-    <section class="player-layout" aria-label="Lecteur et playlist">
-      <article class="player-panel">
-        <div class="video-frame">
-          <video
-            id="player"
-            class="main-video"
-            controls
-            preload="metadata"
-            playsinline
-            aria-label="Lecteur vidéo principal"
-          >
-            Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
-          </video>
+    <section class="tabs-section">
+      <div class="container-wide">
+        <div class="playlist-tabs" id="playlist-tabs">
+          <button class="playlist-tab active" type="button" data-filter="all">Toutes</button>
+          <button class="playlist-tab" type="button" data-filter="Music 1">Music 1</button>
+          <button class="playlist-tab" type="button" data-filter="Music 2">Music 2</button>
+          <button class="playlist-tab" type="button" data-filter="Live">Live</button>
         </div>
+      </div>
+    </section>
 
-        <div class="player-meta">
-          <div class="meta-left">
-            <p class="meta-label">Lecture en cours</p>
-            <h3 id="video-title" class="video-title">Chargement…</h3>
-          </div>
+    <section class="player-section">
+      <div class="container-wide">
+        <div class="media-layout">
+          <article class="panel player-panel">
+            <div class="video-frame">
+              <video id="player" controls preload="metadata" playsinline></video>
+            </div>
 
-          <div class="meta-right">
-            <span id="video-counter" class="video-counter">0 / 0</span>
-          </div>
+            <div class="player-meta">
+              <p class="now-label">Lecture en cours</p>
+              <h2 id="video-title">Chargement…</h2>
+              <p id="video-description" class="video-description">
+                Chargement de la description…
+              </p>
+            </div>
+
+            <div class="player-actions">
+              <button id="prev-btn" class="nav-btn" type="button">← Back</button>
+              <div class="player-status">
+                <span id="video-counter">0 / 0</span>
+              </div>
+              <button id="next-btn" class="nav-btn" type="button">Next →</button>
+            </div>
+          </article>
+
+          <aside class="panel sidebar-panel">
+            <div class="playlist-head">
+              <span class="eyebrow">Sélection</span>
+              <h2>Playlist</h2>
+            </div>
+
+            <div id="playlist" class="playlist-list">
+              <p class="loading-text">Chargement de la playlist…</p>
+            </div>
+          </aside>
         </div>
-      </article>
-
-      <aside class="playlist-panel" aria-label="Playlist">
-        <div class="playlist-head">
-          <div>
-            <p class="eyebrow">Sélection</p>
-            <h3 class="playlist-title">Playlist</h3>
-          </div>
-        </div>
-
-        <div id="playlist" class="playlist-list">
-          <div class="playlist-empty">
-            <p>Chargement de la playlist…</p>
-          </div>
-        </div>
-      </aside>
+      </div>
     </section>
   </main>
 </body>
