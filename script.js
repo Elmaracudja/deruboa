@@ -21,6 +21,14 @@ const playlistEnd = document.getElementById("playlist-end");
 let playlist = [];
 let currentIndex = 0;
 let currentTheme = root.getAttribute("data-theme") || "dark";
+let autoplayAllowed = true;
+
+player.muted = true;
+player.defaultMuted = true;
+player.setAttribute("muted", "");
+player.setAttribute("playsinline", "");
+player.setAttribute("webkit-playsinline", "");
+player.autoplay = true;
 
 function updateThemeLabel() {
   themeLabel.textContent = currentTheme === "dark" ? "Clair" : "Foncé";
@@ -40,7 +48,8 @@ document.addEventListener("contextmenu", (event) => {
 });
 
 document.addEventListener("dragstart", (event) => {
-  if (event.target.tagName === "IMG" || event.target.tagName === "VIDEO") {
+  const tag = event.target.tagName;
+  if (tag === "IMG" || tag === "VIDEO") {
     event.preventDefault();
   }
 });
@@ -85,10 +94,9 @@ function renderPlaylist() {
       <span class="playlist-item-meta">${item.author || "EKWallegory Prod"}</span>
     `;
 
-    button.addEventListener("click", () => {
+    button.addEventListener("click", async () => {
       hideEndPanel();
-      loadVideo(index);
-      attemptAutoplay(false);
+      await loadVideo(index, true);
     });
 
     playlistContainer.appendChild(button);
@@ -97,11 +105,56 @@ function renderPlaylist() {
   updateCounter();
 }
 
-function loadVideo(index) {
+async function safePlay(initial = false) {
+  try {
+    player.muted = true;
+    player.defaultMuted = true;
+    const promise = player.play();
+
+    if (promise && typeof promise.then === "function") {
+      await promise;
+    }
+
+    autoplayAllowed = true;
+  } catch (error) {
+    autoplayAllowed = false;
+    if (initial) {
+      videoDescription.textContent =
+        "Votre appareil a bloqué le démarrage automatique. Appuyez sur play pour lancer la playlist.";
+    }
+  }
+}
+
+function waitForVideoReady() {
+  return new Promise((resolve) => {
+    if (player.readyState >= 2) {
+      resolve();
+      return;
+    }
+
+    const onReady = () => {
+      player.removeEventListener("loadedmetadata", onReady);
+      player.removeEventListener("canplay", onReady);
+      resolve();
+    };
+
+    player.addEventListener("loadedmetadata", onReady, { once: true });
+    player.addEventListener("canplay", onReady, { once: true });
+  });
+}
+
+async function loadVideo(index, shouldAutoplay = true) {
   if (!playlist.length) return;
 
   currentIndex = index;
   const item = playlist[currentIndex];
+
+  player.pause();
+  player.muted = true;
+  player.defaultMuted = true;
+
+  player.removeAttribute("src");
+  player.load();
 
   player.src = item.src;
   player.load();
@@ -114,30 +167,23 @@ function loadVideo(index) {
   overlayMeta.textContent = item.author || "EKWallegory Prod";
 
   renderPlaylist();
-}
+  hideEndPanel();
 
-function attemptAutoplay(initial = false) {
-  const playPromise = player.play();
+  await waitForVideoReady();
 
-  if (playPromise && typeof playPromise.then === "function") {
-    playPromise.catch(() => {
-      if (initial) {
-        videoDescription.textContent = "Lecture prête. Appuyez sur play si votre appareil bloque le démarrage automatique.";
-      }
-    });
+  if (shouldAutoplay) {
+    await safePlay(index === 0);
   }
 }
 
 function restartPlaylist() {
   if (!playlist.length) return;
-  hideEndPanel();
-  loadVideo(0);
-  attemptAutoplay(false);
+  loadVideo(0, true);
 }
 
 async function loadPlaylist() {
   try {
-    const response = await fetch("./playlist.json");
+    const response = await fetch("./playlist.json", { cache: "no-store" });
     if (!response.ok) throw new Error("playlist.json introuvable");
 
     const data = await response.json();
@@ -148,8 +194,7 @@ async function loadPlaylist() {
       return;
     }
 
-    loadVideo(0);
-    attemptAutoplay(true);
+    await loadVideo(0, true);
   } catch (error) {
     playlistContainer.innerHTML = `<p class="loading-text">Impossible de charger playlist.json.</p>`;
     videoTitle.textContent = "Erreur de chargement";
@@ -161,26 +206,22 @@ async function loadPlaylist() {
   }
 }
 
-prevBtn.addEventListener("click", () => {
+prevBtn.addEventListener("click", async () => {
   if (!playlist.length) return;
-  hideEndPanel();
   currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-  loadVideo(currentIndex);
-  attemptAutoplay(false);
+  await loadVideo(currentIndex, true);
 });
 
-nextBtn.addEventListener("click", () => {
+nextBtn.addEventListener("click", async () => {
   if (!playlist.length) return;
-  hideEndPanel();
   currentIndex = (currentIndex + 1) % playlist.length;
-  loadVideo(currentIndex);
-  attemptAutoplay(false);
+  await loadVideo(currentIndex, true);
 });
 
 restartBtn.addEventListener("click", restartPlaylist);
 restartEndBtn.addEventListener("click", restartPlaylist);
 
-player.addEventListener("ended", () => {
+player.addEventListener("ended", async () => {
   if (!playlist.length) return;
 
   if (currentIndex >= playlist.length - 1) {
@@ -189,8 +230,27 @@ player.addEventListener("ended", () => {
   }
 
   currentIndex += 1;
-  loadVideo(currentIndex);
-  attemptAutoplay(false);
+  await loadVideo(currentIndex, true);
 });
+
+document.addEventListener(
+  "touchstart",
+  async () => {
+    if (!autoplayAllowed && player.paused && playlist.length) {
+      await safePlay(false);
+    }
+  },
+  { once: true }
+);
+
+document.addEventListener(
+  "click",
+  async () => {
+    if (!autoplayAllowed && player.paused && playlist.length) {
+      await safePlay(false);
+    }
+  },
+  { once: true }
+);
 
 loadPlaylist();
