@@ -2,16 +2,22 @@
   {
     "title": "OpenArt 1",
     "src": "./videos/openart1.mp4",
-    "description": "Première production vidéo pour EM101 Webradio."
+    "description": "Première production vidéo pour EM101 Webradio.",
+    "author": "EKwallegory Prod",
+    "channel": "EM101 Webradio"
   },
   {
     "title": "Grok 1",
     "src": "./videos/grok1.mp4",
-    "description": "Création artistique liée à l’univers musical de la webradio."
+    "description": "Création artistique liée à l’univers musical de la webradio.",
+    "author": "EKwallegory Prod",
+    "channel": "EM101 Webradio"
   },
   {
     "title": "Signal 3",
     "src": "./videos/signal3.mp4",
-    "description": "Nouvelle variation visuelle proposée par EKwallegory Prod."
+    "description": "Nouvelle variation visuelle proposée par EKwallegory Prod.",
+    "author": "EKwallegory Prod",
+    "channel": "EM101 Webradio"
   }
 ]
