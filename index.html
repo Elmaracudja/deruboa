@@ -1,1 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Deruboa — playlist vidéo MP4 avec lecture automatique dans une interface élégante et minimaliste." />
+  <title>Deruboa</title>
 
+  <link rel="preconnect" href="https://api.fontshare.com" />
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="./style.css" />
+  <script src="./script.js" defer></script>
+</head>
+<body>
+  <a href="#main" class="skip-link">Aller au contenu</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="./index.html" class="brand-link" aria-label="Accueil Deruboa">
+        <div class="logo-slot">
+          <img
+            src="./assets/logo-deruboa.png"
+            alt="Logo Deruboa"
+            class="logo-image"
+            width="160"
+            height="160"
+            loading="eager"
+          />
+        </div>
+
+        <div class="brand-copy">
+          <p class="eyebrow">Mini website</p>
+          <h1>Deruboa</h1>
+          <p class="brand-subtitle">Playlist vidéo automatique</p>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <main id="main" class="page-shell">
+    <section class="hero-block">
+      <div class="hero-copy">
+        <p class="eyebrow">Expérience vidéo</p>
+        <h2 class="hero-title">Une vitrine sombre, fluide et propre pour tes MP4.</h2>
+        <p class="hero-text">
+          Tes vidéos se lancent dans un lecteur central élégant, avec une playlist claire et un enchaînement automatique pensé pour une lecture simple et agréable.
+        </p>
+      </div>
+    </section>
+
+    <section class="player-layout" aria-label="Lecteur et playlist">
+      <article class="player-panel">
+        <div class="video-frame">
+          <video
+            id="player"
+            class="main-video"
+            controls
+            preload="metadata"
+            playsinline
+            aria-label="Lecteur vidéo principal"
+          >
+            Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
+          </video>
+        </div>
+
+        <div class="player-meta">
+          <div class="meta-left">
+            <p class="meta-label">Lecture en cours</p>
+            <h3 id="video-title" class="video-title">Chargement…</h3>
+          </div>
+
+          <div class="meta-right">
+            <span id="video-counter" class="video-counter">0 / 0</span>
+          </div>
+        </div>
+      </article>
+
+      <aside class="playlist-panel" aria-label="Playlist">
+        <div class="playlist-head">
+          <div>
+            <p class="eyebrow">Sélection</p>
+            <h3 class="playlist-title">Playlist</h3>
+          </div>
+        </div>
+
+        <div id="playlist" class="playlist-list">
+          <div class="playlist-empty">
+            <p>Chargement de la playlist…</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+</body>
+</html>
