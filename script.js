@@ -7,12 +7,9 @@ const videoDescription = document.getElementById("video-description");
 const videoCounter = document.getElementById("video-counter");
 const prevBtn = document.getElementById("prev-btn");
 const nextBtn = document.getElementById("next-btn");
-const tabsContainer = document.getElementById("playlist-tabs");
 
-let allVideos = [];
-let filteredVideos = [];
+let playlist = [];
 let currentIndex = 0;
-let currentFilter = "all";
 let currentTheme = root.getAttribute("data-theme") || "dark";
 
 if (themeToggle) {
@@ -22,12 +19,8 @@ if (themeToggle) {
   });
 }
 
-function normalizeCategory(value) {
-  return (value || "").trim().toLowerCase();
-}
-
 function updateCounter() {
-  const total = filteredVideos.length;
+  const total = playlist.length;
   const current = total ? currentIndex + 1 : 0;
   videoCounter.textContent = `${current} / ${total}`;
 }
@@ -35,17 +28,15 @@ function updateCounter() {
 function renderPlaylist() {
   playlistContainer.innerHTML = "";
 
-  if (!filteredVideos.length) {
-    playlistContainer.innerHTML = `<p class="loading-text">Aucune vidéo dans cette catégorie.</p>`;
+  if (!playlist.length) {
+    playlistContainer.innerHTML = `<p class="loading-text">Aucune vidéo disponible.</p>`;
     videoTitle.textContent = "Aucune vidéo disponible";
-    videoDescription.textContent = "Ajoute des entrées dans playlist.json ou change de catégorie.";
+    videoDescription.textContent = "Ajoute des vidéos dans playlist.json.";
     updateCounter();
-    player.removeAttribute("src");
-    player.load();
     return;
   }
 
-  filteredVideos.forEach((item, index) => {
+  playlist.forEach((item, index) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "playlist-item";
@@ -54,7 +45,7 @@ function renderPlaylist() {
     button.innerHTML = `
       <span class="playlist-item-index">Vidéo ${index + 1}</span>
       <span class="playlist-item-title">${item.title}</span>
-      <span class="playlist-item-meta">${item.category || "Playlist"} · ${item.src}</span>
+      <span class="playlist-item-meta">${item.src}</span>
     `;
 
     button.addEventListener("click", () => {
@@ -69,10 +60,10 @@ function renderPlaylist() {
 }
 
 function loadVideo(index) {
-  if (!filteredVideos.length) return;
+  if (!playlist.length) return;
 
   currentIndex = index;
-  const item = filteredVideos[currentIndex];
+  const item = playlist[currentIndex];
 
   player.src = item.src;
   player.load();
@@ -80,25 +71,6 @@ function loadVideo(index) {
   videoTitle.textContent = item.title || "Sans titre";
   videoDescription.textContent = item.description || "Aucune description fournie.";
   renderPlaylist();
-}
-
-function applyFilter(filterValue) {
-  currentFilter = filterValue;
-
-  if (currentFilter === "all") {
-    filteredVideos = [...allVideos];
-  } else {
-    filteredVideos = allVideos.filter(
-      (item) => normalizeCategory(item.category) === normalizeCategory(currentFilter)
-    );
-  }
-
-  currentIndex = 0;
-  renderPlaylist();
-
-  if (filteredVideos.length) {
-    loadVideo(0);
-  }
 }
 
 async function loadPlaylist() {
@@ -109,15 +81,13 @@ async function loadPlaylist() {
     }
 
     const data = await response.json();
-    allVideos = Array.isArray(data) ? data : [];
+    playlist = Array.isArray(data) ? data : [];
 
-    if (!allVideos.length) {
-      filteredVideos = [];
+    if (!playlist.length) {
       renderPlaylist();
       return;
     }
 
-    filteredVideos = [...allVideos];
     loadVideo(0);
   } catch (error) {
     playlistContainer.innerHTML = `<p class="loading-text">Impossible de charger playlist.json.</p>`;
@@ -127,26 +97,10 @@ async function loadPlaylist() {
   }
 }
 
-if (tabsContainer) {
-  tabsContainer.addEventListener("click", (event) => {
-    const button = event.target.closest(".playlist-tab");
-    if (!button) return;
-
-    const filterValue = button.dataset.filter || "all";
-
-    tabsContainer.querySelectorAll(".playlist-tab").forEach((tab) => {
-      tab.classList.remove("active");
-    });
-    button.classList.add("active");
-
-    applyFilter(filterValue);
-  });
-}
-
 if (prevBtn) {
   prevBtn.addEventListener("click", () => {
-    if (!filteredVideos.length) return;
-    currentIndex = (currentIndex - 1 + filteredVideos.length) % filteredVideos.length;
+    if (!playlist.length) return;
+    currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
     loadVideo(currentIndex);
     player.play().catch(() => {});
   });
@@ -154,16 +108,16 @@ if (prevBtn) {
 
 if (nextBtn) {
   nextBtn.addEventListener("click", () => {
-    if (!filteredVideos.length) return;
-    currentIndex = (currentIndex + 1) % filteredVideos.length;
+    if (!playlist.length) return;
+    currentIndex = (currentIndex + 1) % playlist.length;
     loadVideo(currentIndex);
     player.play().catch(() => {});
   });
 }
 
 player.addEventListener("ended", () => {
-  if (!filteredVideos.length) return;
-  currentIndex = (currentIndex + 1) % filteredVideos.length;
+  if (!playlist.length) return;
+  currentIndex = (currentIndex + 1) % playlist.length;
   loadVideo(currentIndex);
   player.play().catch(() => {});
 });
