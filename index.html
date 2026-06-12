@@ -26,7 +26,16 @@
           </div>
 
           <button class="theme-toggle" type="button" id="theme-toggle" aria-label="Changer le thème">
-            Theme
+            <span class="theme-icon" aria-hidden="true" id="theme-icon">
+              <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"></circle>
+                <path d="M12 2v2.2M12 19.8V22M4.22 4.22l1.55 1.55M18.23 18.23l1.55 1.55M2 12h2.2M19.8 12H22M4.22 19.78l1.55-1.55M18.23 5.77l1.55-1.55"></path>
+              </svg>
+              <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            </span>
+            <span id="theme-label">Theme</span>
           </button>
         </div>
 
@@ -47,8 +56,26 @@
       <div class="container-wide">
         <div class="media-layout">
           <article class="panel player-panel">
-            <div class="video-frame">
-              <video id="player" controls preload="metadata" playsinline></video>
+            <div class="video-frame no-context" id="video-frame">
+              <video
+                id="player"
+                controls
+                preload="metadata"
+                playsinline
+                webkit-playsinline
+                autoplay
+                muted
+              ></video>
+
+              <div class="video-overlay" id="video-overlay">
+                <div class="overlay-top">
+                  <p class="overlay-channel" id="overlay-channel">EM101 Webradio</p>
+                  <h2 class="overlay-title" id="overlay-title">Chargement…</h2>
+                </div>
+                <div class="overlay-bottom">
+                  <p class="overlay-meta" id="overlay-meta">EKwallegory Prod</p>
+                </div>
+              </div>
             </div>
 
             <div class="player-meta">
@@ -64,7 +91,17 @@
               <div class="player-status">
                 <span id="video-counter">0 / 0</span>
               </div>
-              <button id="next-btn" class="nav-btn" type="button">Next →</button>
+              <div class="action-group">
+                <button id="restart-btn" class="nav-btn" type="button">⟲ Restart playlist</button>
+                <button id="next-btn" class="nav-btn" type="button">Next →</button>
+              </div>
+            </div>
+
+            <div class="playlist-end" id="playlist-end" hidden>
+              <p>La playlist est terminée.</p>
+              <button id="restart-end-btn" class="restart-main-btn" type="button">
+                Repartir au début
+              </button>
             </div>
           </article>
 
