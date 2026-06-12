@@ -6,7 +6,11 @@ from pathlib import Path
 ROOT = Path.cwd()
 VIDEO_DIR = ROOT / "videos"
 PLAYLIST_JSON = ROOT / "playlist.json"
-README = ROOT / "AUTO-PLAYLIST-README.md"
+TARGET_FILES = [
+    ROOT / "index.html",
+    ROOT / "script.js",
+    ROOT / "style.css",
+]
 
 VIDEO_EXTENSIONS = {".mp4", ".m4v", ".webm", ".mov"}
 DEFAULT_AUTHOR = "EKWallegory Prod"
@@ -27,16 +31,6 @@ def ensure_videos_dir():
         raise SystemExit("Le dossier 'videos/' est introuvable. Place ce script à la racine du site.")
 
 
-def load_existing_playlist():
-    if not PLAYLIST_JSON.exists():
-        return []
-
-    try:
-        return json.loads(PLAYLIST_JSON.read_text(encoding="utf-8"))
-    except Exception:
-        return []
-
-
 def scan_videos():
     ensure_videos_dir()
     files = [
@@ -46,24 +40,32 @@ def scan_videos():
     return sorted(files, key=lambda p: p.name.lower())
 
 
+def load_existing_playlist():
+    if not PLAYLIST_JSON.exists():
+        return []
+    try:
+        return json.loads(PLAYLIST_JSON.read_text(encoding="utf-8"))
+    except Exception:
+        return []
+
+
 def build_playlist(video_files):
     existing = load_existing_playlist()
-    existing_by_src = {
-        item.get("src"): item
+    existing_by_title = {
+        item.get("title"): item
         for item in existing
-        if isinstance(item, dict) and item.get("src")
+        if isinstance(item, dict) and item.get("title")
     }
 
     playlist = []
-
     for video_file in video_files:
-        rel_src = f"./videos/{video_file.name}"
-        old = existing_by_src.get(rel_src, {})
+        title = slug_to_title(video_file.name)
+        old = existing_by_title.get(title, {})
 
         playlist.append({
-            "title": old.get("title") or slug_to_title(video_file.name),
-            "src": rel_src,
-            "description": old.get("description") or f"Production vidéo {slug_to_title(video_file.name)} pour {DEFAULT_CHANNEL}.",
+            "title": old.get("title") or title,
+            "src": f"./videos/{video_file.name}",
+            "description": old.get("description") or f"Production vidéo {title} pour {DEFAULT_CHANNEL}.",
             "author": old.get("author") or DEFAULT_AUTHOR,
             "channel": old.get("channel") or DEFAULT_CHANNEL
         })
@@ -76,6 +78,46 @@ def write_playlist(playlist):
         json.dumps(playlist, ensure_ascii=False, indent=2),
         encoding="utf-8"
     )
+
+
+def replace_video_references_in_text(text: str, real_video_names):
+    pattern = r'(\.?/videos/)([^"\'\s)]+)'
+    found_refs = re.findall(pattern, text)
+
+    if not found_refs:
+        return text
+
+    real_names_by_stem = {Path(name).stem.lower(): name for name in real_video_names}
+
+    def replacer(match):
+        prefix = match.group(1)
+        old_name = match.group(2)
+        old_path = Path(old_name)
+        stem = old_path.stem.lower()
+
+        if stem in real_names_by_stem:
+            return prefix + real_names_by_stem[stem]
+
+        return match.group(0)
+
+    return re.sub(pattern, replacer, text)
+
+
+def update_target_files(video_files):
+    real_video_names = [file.name for file in video_files]
+
+    for file_path in TARGET_FILES:
+        if not file_path.exists():
+            continue
+
+        original = file_path.read_text(encoding="utf-8")
+        updated = replace_video_references_in_text(original, real_video_names)
+
+        if updated != original:
+            file_path.write_text(updated, encoding="utf-8")
+            print(f"[OK] Références vidéo mises à jour dans {file_path.name}")
+        else:
+            print(f"[=] Aucun changement dans {file_path.name}")
 
 
 def write_readme():
@@ -95,32 +137,27 @@ python3 update_playlist.py
 
 - détecte automatiquement les vidéos dans `videos/`,
 - met à jour `playlist.json`,
-- conserve les métadonnées existantes si le même chemin vidéo existe déjà,
-- génère un titre propre à partir du nom du fichier si nécessaire.
-
-## Exemple
-
-Si tu renommes :
-- `openart1.mp4` → `nouveau-clip.mp4`
-
-le script recréera une entrée avec :
-- `src: ./videos/nouveau-clip.mp4`
-- `title: Nouveau Clip`
+- force les chemins vidéo à correspondre aux vrais noms présents dans `videos/`,
+- met à jour aussi les références trouvées dans `index.html`, `script.js` et `style.css`,
+- conserve les métadonnées existantes quand c'est possible.
 
 ## Important
 
-Le site doit lire `playlist.json` dynamiquement via `fetch()` dans `script.js`. Si ton code actuel est celui mis en place précédemment, aucune autre modification manuelle n'est nécessaire.
+Le dossier `videos/` devient la source de vérité.
 """
-    README.write_text(content, encoding="utf-8")
+    (ROOT / "AUTO-PLAYLIST-README.md").write_text(content, encoding="utf-8")
 
 
 def main():
-    videos = scan_videos()
-    playlist = build_playlist(videos)
+    video_files = scan_videos()
+    playlist = build_playlist(video_files)
     write_playlist(playlist)
+    update_target_files(video_files)
     write_readme()
 
-    print(f"{len(playlist)} vidéo(s) détectée(s). playlist.json mis à jour.")
+    print(f"\n{len(playlist)} vidéo(s) détectée(s).")
+    print("playlist.json a été régénéré.\n")
+
     for item in playlist:
         print(f"- {item['src']} -> {item['title']}")
 
