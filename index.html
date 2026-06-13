@@ -19,7 +19,19 @@
 
     <section class="player-panel">
       <div class="video-wrap">
-        <video id="player" controls autoplay muted playsinline preload="metadata"></video>
+        <video
+          id="player"
+          controls
+          autoplay
+          muted
+          playsinline
+          preload="metadata"
+          controlslist="nodownload noremoteplayback"
+          disablepictureinpicture
+          oncontextmenu="return false;"
+        >
+          Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
+        </video>
       </div>
 
       <div class="meta">
