@@ -1,10 +1,13 @@
 const player = document.getElementById("player");
 const videoTitle = document.getElementById("video-title");
 const videoFile = document.getElementById("video-file");
+const playlistLoop = document.getElementById("playlist-loop");
 
 let playlist = [];
 let currentIndex = 0;
 let failedIndexes = new Set();
+
+player.loop = false;
 
 function getDisplayName(item) {
   if (item.title) return item.title;
@@ -26,8 +29,9 @@ function updateMeta(item, suffix = "") {
 
 function loadVideo(index) {
   if (!playlist.length) return;
+  if (index < 0 || index >= playlist.length) return;
 
-  currentIndex = ((index % playlist.length) + playlist.length) % playlist.length;
+  currentIndex = index;
   const item = playlist[currentIndex];
 
   player.src = item.src;
@@ -55,7 +59,33 @@ function skipToNextPlayable() {
 
   const failedItem = playlist[currentIndex];
   updateMeta(failedItem, " — fichier illisible, passage au suivant…");
-  loadVideo(currentIndex + 1);
+
+  let nextIndex = currentIndex + 1;
+
+  while (failedIndexes.has(nextIndex) && nextIndex < playlist.length) {
+    nextIndex += 1;
+  }
+
+  if (nextIndex < playlist.length) {
+    loadVideo(nextIndex);
+    return;
+  }
+
+  if (playlistLoop.checked) {
+    nextIndex = 0;
+    while (failedIndexes.has(nextIndex) && nextIndex < playlist.length) {
+      nextIndex += 1;
+    }
+    if (nextIndex < playlist.length) {
+      loadVideo(nextIndex);
+      return;
+    }
+  }
+
+  videoTitle.textContent = "Fin de lecture";
+  videoFile.textContent = "Aucune autre vidéo lisible disponible.";
+  player.removeAttribute("src");
+  player.load();
 }
 
 fetch("./playlist.json?_=" + Date.now())
@@ -82,8 +112,23 @@ fetch("./playlist.json?_=" + Date.now())
 
 player.addEventListener("ended", () => {
   if (!playlist.length) return;
+
   failedIndexes.delete(currentIndex);
-  loadVideo(currentIndex + 1);
+
+  const nextIndex = currentIndex + 1;
+
+  if (nextIndex < playlist.length) {
+    loadVideo(nextIndex);
+    return;
+  }
+
+  if (playlistLoop.checked) {
+    failedIndexes.clear();
+    loadVideo(0);
+    return;
+  }
+
+  videoFile.textContent = `${getFilename(playlist[currentIndex])} — fin de playlist.`;
 });
 
 player.addEventListener("error", () => {
