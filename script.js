@@ -7,7 +7,17 @@ let playlist = [];
 let currentIndex = 0;
 let failedIndexes = new Set();
 
+document.addEventListener("contextmenu", (event) => {
+  event.preventDefault();
+});
+
 player.loop = false;
+player.disablePictureInPicture = true;
+
+if (player.controlsList) {
+  player.controlsList.add("nodownload");
+  player.controlsList.add("noremoteplayback");
+}
 
 function getDisplayName(item) {
   if (item.title) return item.title;
@@ -27,6 +37,15 @@ function updateMeta(item, suffix = "") {
   videoFile.textContent = `${getFilename(item)}${suffix}`;
 }
 
+function stopPlayback(message) {
+  player.pause();
+  player.removeAttribute("src");
+  player.load();
+  if (message) {
+    videoFile.textContent = message;
+  }
+}
+
 function loadVideo(index) {
   if (!playlist.length) return;
   if (index < 0 || index >= playlist.length) return;
@@ -44,6 +63,24 @@ function loadVideo(index) {
   });
 }
 
+function findNextPlayableIndex(startIndex) {
+  for (let i = startIndex; i < playlist.length; i += 1) {
+    if (!failedIndexes.has(i)) {
+      return i;
+    }
+  }
+
+  if (playlistLoop.checked) {
+    for (let i = 0; i < startIndex; i += 1) {
+      if (!failedIndexes.has(i)) {
+        return i;
+      }
+    }
+  }
+
+  return -1;
+}
+
 function skipToNextPlayable() {
   if (!playlist.length) return;
 
@@ -51,41 +88,22 @@ function skipToNextPlayable() {
 
   if (failedIndexes.size >= playlist.length) {
     videoTitle.textContent = "Aucune vidéo lisible";
-    videoFile.textContent = "Tous les fichiers de la playlist ont échoué.";
-    player.removeAttribute("src");
-    player.load();
+    stopPlayback("Tous les fichiers de la playlist ont échoué.");
     return;
   }
 
   const failedItem = playlist[currentIndex];
   updateMeta(failedItem, " — fichier illisible, passage au suivant…");
 
-  let nextIndex = currentIndex + 1;
+  const nextIndex = findNextPlayableIndex(currentIndex + 1);
 
-  while (failedIndexes.has(nextIndex) && nextIndex < playlist.length) {
-    nextIndex += 1;
-  }
-
-  if (nextIndex < playlist.length) {
+  if (nextIndex !== -1) {
     loadVideo(nextIndex);
     return;
   }
 
-  if (playlistLoop.checked) {
-    nextIndex = 0;
-    while (failedIndexes.has(nextIndex) && nextIndex < playlist.length) {
-      nextIndex += 1;
-    }
-    if (nextIndex < playlist.length) {
-      loadVideo(nextIndex);
-      return;
-    }
-  }
-
   videoTitle.textContent = "Fin de lecture";
-  videoFile.textContent = "Aucune autre vidéo lisible disponible.";
-  player.removeAttribute("src");
-  player.load();
+  stopPlayback("Aucune autre vidéo lisible disponible.");
 }
 
 fetch("./playlist.json?_=" + Date.now())
