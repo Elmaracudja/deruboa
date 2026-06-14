@@ -6,5 +6,13 @@
     "description": "EM101 Webradio, coming soon with some new video content",
     "author": "EKWallegory Prod",
     "channel": "EM101 Webradio"
+  },
+  {
+    "id": 2,
+    "title": "Demo purpose",
+    "src": "./videos/PUB003.mp4",
+    "description": "EM101 Webradio, Video Player Test",
+    "author": "EKWallegory Prod",
+    "channel": "EM101 Webradio"
   }
 ]
