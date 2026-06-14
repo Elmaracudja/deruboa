@@ -4,6 +4,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
+CWD = Path.cwd()
 VIDEO_DIR = ROOT / "videos"
 PLAYLIST_JSON = ROOT / "playlist.json"
 README = ROOT / "AUTO-PLAYLIST-README.md"
@@ -50,9 +51,26 @@ def slug_to_title(filename: str) -> str:
     return stem.title() if stem else "Sans titre"
 
 
+def debug_paths():
+    print("\n=== DEBUG CHEMINS ===")
+    print("Script exécuté :", Path(__file__).resolve())
+    print("ROOT          :", ROOT)
+    print("CWD           :", CWD)
+    print("VIDEO_DIR     :", VIDEO_DIR)
+    print("PLAYLIST_JSON :", PLAYLIST_JSON)
+    print("INDEX_HTML    :", INDEX_HTML)
+    print("SCRIPT_JS     :", SCRIPT_JS)
+    print("ASSETS_DIR    :", ASSETS_DIR)
+    print("=====================\n")
+
+
 def ensure_videos_dir():
     if not VIDEO_DIR.exists() or not VIDEO_DIR.is_dir():
-        raise SystemExit("Le dossier 'videos/' est introuvable. Place ce script à la racine du site.")
+        raise SystemExit(
+            f"Le dossier 'videos/' est introuvable.\n"
+            f"Chemin attendu : {VIDEO_DIR}\n"
+            f"Place ce script à la racine du site."
+        )
 
 
 def scan_videos():
@@ -61,7 +79,17 @@ def scan_videos():
         path for path in VIDEO_DIR.iterdir()
         if path.is_file() and path.suffix.lower() in VIDEO_EXTENSIONS
     ]
-    return sorted(files, key=lambda p: p.name.lower())
+    files = sorted(files, key=lambda p: p.name.lower())
+
+    print("=== DEBUG VIDEOS ===")
+    if files:
+        for path in files:
+            print(f"[VIDEO] {path.name}")
+    else:
+        print("[VIDEO] Aucune vidéo détectée dans videos/")
+    print("====================\n")
+
+    return files
 
 
 def build_playlist(video_files):
@@ -85,6 +113,7 @@ def write_playlist(playlist):
         json.dumps(playlist, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8"
     )
+    print(f"[OK] playlist.json écrit dans : {PLAYLIST_JSON}")
 
 
 def find_logo_file():
@@ -196,6 +225,7 @@ def sync_index_html():
         if updated != content:
             INDEX_HTML.write_text(updated, encoding="utf-8")
             content = updated
+            messages.append(f"[OK] index.html mis à jour : {INDEX_HTML}")
         messages.append(msg)
         messages.append(f"[OK] Logo détecté : {logo_path.name}")
 
@@ -232,9 +262,12 @@ Le script ne réécrit pas `script.js` ni `style.css`.
 Il vérifie seulement que les protections attendues sont bien en place.
 """
     README.write_text(content, encoding="utf-8")
+    print(f"[OK] README écrit dans : {README}")
 
 
 def main():
+    debug_paths()
+
     video_files = scan_videos()
     playlist = build_playlist(video_files)
     write_playlist(playlist)
@@ -251,8 +284,11 @@ def main():
         print(msg)
 
     print()
-    for item in playlist:
-        print(f"- {item['filename']} -> {item['title']}")
+    if playlist:
+        for item in playlist:
+            print(f"- {item['filename']} -> {item['title']}")
+    else:
+        print("[INFO] Playlist vide : aucun fichier vidéo compatible trouvé.")
 
 
 if __name__ == "__main__":
