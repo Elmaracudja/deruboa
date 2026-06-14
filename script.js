@@ -21,20 +21,17 @@ if (player.controlsList) {
 
 function getDisplayName(item) {
   if (item.title) return item.title;
-  if (item.filename) return item.filename;
-  if (item.src) return item.src.split("/").pop();
   return "Vidéo sans titre";
 }
 
-function getFilename(item) {
-  if (item.filename) return item.filename;
-  if (item.src) return item.src.split("/").pop();
-  return "Fichier inconnu";
+function getSecondaryText(item, suffix = "") {
+  const baseText = item.description || "";
+  return `${baseText}${suffix}`;
 }
 
 function updateMeta(item, suffix = "") {
   videoTitle.textContent = getDisplayName(item);
-  videoFile.textContent = `${getFilename(item)}${suffix}`;
+  videoFile.textContent = getSecondaryText(item, suffix);
 }
 
 function stopPlayback(message) {
@@ -57,6 +54,14 @@ function loadVideo(index) {
   player.load();
 
   updateMeta(item);
+
+  if ("mediaSession" in navigator) {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: item.title || "Vidéo sans titre",
+      artist: item.author || "",
+      album: item.channel || ""
+    });
+  }
 
   player.play().catch((error) => {
     console.warn("Lecture impossible :", item.src, error);
@@ -146,7 +151,7 @@ player.addEventListener("ended", () => {
     return;
   }
 
-  videoFile.textContent = `${getFilename(playlist[currentIndex])} — fin de playlist.`;
+  videoFile.textContent = "Fin de playlist.";
 });
 
 player.addEventListener("error", () => {
