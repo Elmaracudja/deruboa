@@ -123,6 +123,10 @@ body {
   word-break: break-word;
 }
 
+.file-name:empty {
+  display: none;
+}
+
 .loop-toggle {
   display: inline-flex;
   align-items: center;
