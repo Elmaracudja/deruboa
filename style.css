@@ -87,6 +87,18 @@ body {
   padding-top: 18px;
 }
 
+.brand {
+  margin: 0 0 18px;
+}
+
+.brand-logo {
+  display: block;
+  width: 100%;
+  max-width: 180px;
+  height: auto;
+  border-radius: 12px;
+}
+
 .label {
   margin: 0 0 8px;
   color: var(--muted-soft);
@@ -109,6 +121,23 @@ body {
   font-size: 1rem;
   line-height: 1.6;
   word-break: break-word;
+}
+
+.loop-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 0.95rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.loop-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
 }
 
 .player-panel.is-error {
@@ -142,6 +171,14 @@ body {
 
   .video-wrap {
     border-radius: 12px;
+  }
+
+  .brand {
+    margin-bottom: 14px;
+  }
+
+  .brand-logo {
+    max-width: 140px;
   }
 
   #video-title {
