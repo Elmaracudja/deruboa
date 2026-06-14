@@ -1,28 +1,10 @@
 [
   {
     "id": 1,
-    "title": "Grok 1",
-    "src": "./videos/grok1.mp4",
-    "filename": "grok1.mp4",
-    "description": "Production vidéo Grok 1 pour EM101 Webradio.",
-    "author": "EKWallegory Prod",
-    "channel": "EM101 Webradio"
-  },
-  {
-    "id": 2,
-    "title": "Grok 2",
-    "src": "./videos/grok2.mp4",
-    "filename": "grok2.mp4",
-    "description": "Production vidéo Grok 2 pour EM101 Webradio.",
-    "author": "EKWallegory Prod",
-    "channel": "EM101 Webradio"
-  },
-  {
-    "id": 3,
-    "title": "Grok 3",
-    "src": "./videos/grok3.mp4",
-    "filename": "grok3.mp4",
-    "description": "Production vidéo Grok 3 pour EM101 Webradio.",
+    "title": "Thanks for watching us",
+    "src": "./videos/PUB002.mp4",
+    "filename": "PUB002.mp4",
+    "description": "EM101 Webradio coming soon with some new video content",
     "author": "EKWallegory Prod",
     "channel": "EM101 Webradio"
   }
